@@ -13,12 +13,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     zlib1g-dev \
-    # THÊM CÁC THƯ VIỆN CẦN THIẾT CHO POSTGRES
     libpq-dev \
-    # Cấu hình và cài đặt extensions (THÊM pdo_pgsql)
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql pdo_pgsql bcmath zip exif pcntl \
-    # Clean cache
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -26,6 +23,14 @@ WORKDIR /var/www/html
 
 # Copy code
 COPY . .
+
+# *** START: THÊM CÁC DÒNG NÀY ***
+# Copy script khởi động
+COPY render-start.sh /usr/local/bin/render-start.sh
+
+# Cấp quyền thực thi cho script
+RUN chmod +x /usr/local/bin/render-start.sh
+# *** END: THÊM CÁC DÒNG NÀY ***
 
 # Cài dependencies
 RUN composer install --optimize-autoloader --no-dev --no-interaction
@@ -42,5 +47,6 @@ RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
 # Expose port (Dùng 80, mặc định của Apache)
 EXPOSE 80
 
-# Start Apache
-CMD ["apache2-foreground"]
+# *** THAY THẾ CMD BẰNG ENTRYPOINT ***
+# ENTRYPOINT sẽ chạy script của bạn, script này sẽ tự gọi apache2-foreground
+ENTRYPOINT ["/usr/local/bin/render-start.sh"]
