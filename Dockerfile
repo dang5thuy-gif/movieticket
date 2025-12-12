@@ -13,8 +13,8 @@ RUN apk update && apk add --no-cache \
     libjpeg-turbo-dev \
     libpng-dev \
     freetype-dev \
-    # Cài đặt các extension PHP
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip bcmath \
+    # Cài đặt các extension PHP (THÊM SODIUM VÀO ĐÂY)
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip bcmath sodium \
     # Cài đặt GD extension
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd \
