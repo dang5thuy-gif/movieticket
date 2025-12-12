@@ -1,0 +1,99 @@
+/* Nút Shadow vàng */
+.ShadowButton {
+    background: transparent;
+    border: 2px solid #ffdd33;
+    color: #ffdd33;
+    padding: 10px 20px;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 17px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: .2s;
+}
+
+.ShadowButton:hover {
+    background: rgba(255,221,51,.18);
+}
+
+/* Dropdown menu tổng thể */
+.dropdown-menu-custom {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #3a2a78 !important;
+    border: 2px solid #ffdd33;
+    border-radius: 10px;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-width: 200px;
+    z-index: 999;
+}
+
+/* Xóa mọi khoảng trắng, padding, border mặc định */
+.dropdown-menu-custom,
+.dropdown-menu-custom * {
+    background: #3a2a78 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+/* Chỉ định padding cho các item */
+.dropdown-menu-custom .dropdown-item {
+    color: #ffdd33 !important;
+    font-weight: 600;
+    padding: 12px 20px !important;
+}
+
+/* Hover */
+.dropdown-menu-custom .dropdown-item:hover {
+    background: rgba(255,221,51,0.2) !important;
+    color: #fff !important;
+}
+
+/* Fix header, divider bị thừa làm xuất hiện màu trắng trên cùng */
+.dropdown-menu-custom .dropdown-header,
+.dropdown-menu-custom .dropdown-divider,
+.dropdown-menu-custom li {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    background: #3a2a78 !important;
+}
+
+/* City item (nội dung menu) */
+.city-item {
+    color: #ffdd33 !important;
+    padding: 12px 20px !important;
+    font-weight: 600;
+}
+
+.city-item:hover {
+    background: rgba(255,221,51,0.2) !important;
+    color: #fff !important;
+}
+
+/* Animation */
+@keyframes fadeSlide {
+    from { opacity:0; transform: translateY(-8px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+
+/* Icon mũi tên dropdown */
+.dropdown-arrow {
+    transition: transform .25s ease;
+}
+
+.dropdown-open-arrow {
+    transform: rotate(180deg);
+}
+
+.rap-arrow {
+    display: inline-block;
+    transition: transform .25s ease;
+}
+
+.rap-arrow-open {
+    transform: rotate(180deg);
+}
