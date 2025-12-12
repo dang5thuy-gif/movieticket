@@ -1,60 +1,42 @@
-# Sử dụng base image là PHP 8.2 FPM (có thể thay đổi phiên bản)
-FROM php:8.2-fpm-alpine
+FROM php:8.3-apache
 
-# Cài đặt các extension PHP cần thiết cho Laravel
-RUN apk update && apk add --no-cache \
-    git \
-    curl \
-    libxml2-dev \
-    postgresql-dev \
-    libzip-dev \
-    npm \
-    # Thêm các thư viện cần thiết cho GD
-    libjpeg-turbo-dev \
+# Cài Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Cài extensions PHP cho Laravel (fix libzip + clean cache để build nhanh)
+RUN apt-get update && apt-get install -y \
     libpng-dev \
-    freetype-dev \
-    # Cài đặt các extension PHP (THÊM SODIUM VÀO ĐÂY)
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip bcmath sodium \
-    # Cài đặt GD extension
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    zlib1g-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd \
-    # Xóa cache
-    && rm -rf /var/cache/apk/*
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql bcmath zip exif pcntl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Thiết lập thư mục làm việc trong container
-WORKDIR /var/www
+# Set working directory
+WORKDIR /var/www/html
 
-# Copy tất cả các file của dự án vào thư mục làm việc
-COPY . /var/www
+# Copy code
+COPY . .
 
-# Cài đặt Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Cài dependencies (chạy sau khi có extensions)
+RUN composer install --optimize-autoloader --no-dev --no-interaction
 
-# Cài đặt các dependencies PHP
-RUN composer install --optimize-autoloader --no-dev
+# Phân quyền storage/cache (cho Laravel production)
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Cài đặt Node.js dependencies và build assets
-RUN npm install
-RUN npm run build
+# Config Apache cho Laravel (trỏ vào public + enable rewrite cho .htaccess)
+RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
+    && sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
+    && a2enmod rewrite
 
-# ==========================================================
-# SỬA LỖI: DI CHUYỂN LỆNH CẤP QUYỀN LÊN TRƯỚC artisan command
-# ==========================================================
+# Expose port
+EXPOSE 8080
 
-# Thiết lập quyền cho thư mục storage và bootstrap/cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
-
-# Khởi tạo APP_KEY và cache config (Quan trọng) - Bây giờ có quyền ghi
-RUN php artisan key:generate
-RUN php artisan config:cache
-
-# ==========================================================
-# (Xóa bỏ các lệnh cấp quyền cũ ở cuối file)
-# ==========================================================
-
-# Mở cổng 9000 cho PHP-FPM
-EXPOSE 9000
-
-# Lệnh mặc định để chạy PHP-FPM
-CMD ["php-fpm"]
+# Start Apache
+CMD ["apache2-foreground"]
