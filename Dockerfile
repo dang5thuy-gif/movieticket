@@ -2,7 +2,6 @@
 FROM php:8.2-fpm-alpine
 
 # Cài đặt các extension PHP cần thiết cho Laravel
-R# Cài đặt các extension PHP cần thiết cho Laravel
 RUN apk update && apk add --no-cache \
     git \
     curl \
