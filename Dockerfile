@@ -32,21 +32,20 @@ COPY render-start.sh /usr/local/bin/render-start.sh
 RUN chmod +x /usr/local/bin/render-start.sh
 # *** END: THÊM CÁC DÒNG NÀY ***
 
+# ... (Phần Copy code, Cài dependencies, v.v. giữ nguyên) ...
+
 # Cài dependencies
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 
-# Phân quyền storage/cache
+# Copy script khởi động
+COPY render-start.sh /usr/local/bin/render-start.sh
+RUN chmod +x /usr/local/bin/render-start.sh
+
+# **KHẮC PHỤC LỖI PERMISSION DENIED:**
+# Chạy chown/chmod lại để đảm bảo www-data có thể ghi
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Config Apache cho Laravel
-RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf \
-    && sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
-    && a2enmod rewrite
+# ... (Phần Config Apache giữ nguyên) ...
 
-# Expose port (Dùng 80, mặc định của Apache)
-EXPOSE 80
-
-# *** THAY THẾ CMD BẰNG ENTRYPOINT ***
-# ENTRYPOINT sẽ chạy script của bạn, script này sẽ tự gọi apache2-foreground
 ENTRYPOINT ["/usr/local/bin/render-start.sh"]
