@@ -37,13 +37,21 @@ RUN composer install --optimize-autoloader --no-dev
 RUN npm install
 RUN npm run build
 
-# Khởi tạo APP_KEY và cache config (Quan trọng)
+# ==========================================================
+# SỬA LỖI: DI CHUYỂN LỆNH CẤP QUYỀN LÊN TRƯỚC artisan command
+# ==========================================================
+
+# Thiết lập quyền cho thư mục storage và bootstrap/cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Khởi tạo APP_KEY và cache config (Quan trọng) - Bây giờ có quyền ghi
 RUN php artisan key:generate
 RUN php artisan config:cache
 
-# Thiết lập quyền cho thư mục storage
-RUN chown -R www-data:www-data /var/www/storage
-RUN chmod -R 775 /var/www/storage
+# ==========================================================
+# (Xóa bỏ các lệnh cấp quyền cũ ở cuối file)
+# ==========================================================
 
 # Mở cổng 9000 cho PHP-FPM
 EXPOSE 9000
