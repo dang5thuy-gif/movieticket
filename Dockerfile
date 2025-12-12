@@ -2,15 +2,23 @@
 FROM php:8.2-fpm-alpine
 
 # Cài đặt các extension PHP cần thiết cho Laravel
-RUN apk update && apk add \
+R# Cài đặt các extension PHP cần thiết cho Laravel
+RUN apk update && apk add --no-cache \
     git \
     curl \
     libxml2-dev \
     postgresql-dev \
     libzip-dev \
     npm \
+    # Thêm các thư viện cần thiết cho GD
+    libjpeg-turbo-dev \
+    libpng-dev \
+    freetype-dev \
     # Cài đặt các extension PHP
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip bcmath \
+    # Cài đặt GD extension
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd \
     # Xóa cache
     && rm -rf /var/cache/apk/*
 
